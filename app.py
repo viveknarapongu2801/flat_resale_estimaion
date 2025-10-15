@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 import os
 import gdown
+import requests
 
 # -----------------------------
 # Step 1: Download model from Google Drive
