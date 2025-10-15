@@ -1,64 +1,52 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import numpy as np
+import os
+import gdown
 
-# Load the trained model (assuming it's saved as 'random_forest_model.pkl')
-# You'll need to save your trained model after the training step
-# Example: joblib.dump(model, 'random_forest_model.pkl')
+# -----------------------------
+# Step 1: Download model from Google Drive
+# -----------------------------
+MODEL_URL = "https://drive.google.com/uc?id=1zyyUQ5B4IszL9g260kAySQYVvUvWLMNc"
+MODEL_PATH = "random_forest_model.pkl"
+
+if not os.path.exists(MODEL_PATH):
+    st.info("Downloading trained model...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
+# Load the trained model
 try:
-    model = joblib.load('random_forest_model.pkl')
+    model = joblib.load(MODEL_PATH)
 except FileNotFoundError:
-    st.error("Model file not found. Please train and save the model first.")
+    st.error("Model file not found. Please check the Google Drive link.")
     st.stop()
 
-# Assuming 'encoder' was used for categorical features and is available
-# You'll need to save and load the encoder as well if you plan to use it for new data
-# Example: joblib.dump(encoder, 'label_encoder.pkl')
-# try:
-#     encoder = joblib.load('label_encoder.pkl')
-# except FileNotFoundError:
-#     st.error("Label encoder file not found.")
-#     st.stop()
-
-
+# -----------------------------
+# Step 2: Streamlit UI
+# -----------------------------
 st.title('HDB Resale Price Predictor')
-
 st.write('Enter the details of the flat to get a predicted resale price.')
 
-# Get unique values for categorical features from the original dataframe
-# This assumes your original dataframe 'df' is available or you have saved the unique values
-try:
-    town_options = df['town'].unique().tolist()
-    flat_type_options = df['flat_type'].unique().tolist()
-    flat_model_options = df['flat_model'].unique().tolist()
-except NameError:
-    st.error("Original dataframe 'df' not found. Please ensure it's loaded or provide unique values for categorical features.")
-    st.stop()
+# Replace df-based unique values with hard-coded lists or load from a file
+town_options = ['ANG MO KIO', 'BEDOK', 'BISHAN', 'BUKIT BATOK', 'BUKIT MERAH']
+flat_type_options = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM', 'EXECUTIVE']
+flat_model_options = ['Model A', 'Model B', 'Model C']
 
-
-# Create input fields for the user
+# Create input fields
 town = st.selectbox('Town', town_options)
 flat_type = st.selectbox('Flat Type', flat_type_options)
 block = st.text_input('Block')
 street_name = st.text_input('Street Name')
-storey_mid = st.slider('Storey Level', 1, 50, 10) # Assuming a reasonable range for storey levels
+storey_mid = st.slider('Storey Level', 1, 50, 10)
 floor_area_sqm = st.number_input('Floor Area (sqm)', min_value=1.0)
 flat_model = st.selectbox('Flat Model', flat_model_options)
 lease_commence_date = st.number_input('Lease Commencement Year', min_value=1960, max_value=2025)
 year = st.number_input('Resale Year', min_value=1990, max_value=2025)
 
-
 if st.button('Predict Resale Price'):
-    # Create a dataframe from user inputs
     input_data = pd.DataFrame([[town, flat_type, block, street_name, floor_area_sqm, flat_model, lease_commence_date, year, storey_mid]],
-                               columns=['town', 'flat_type', 'block', 'street_name', 'floor_area_sqm', 'flat_model', 'lease_commence_date', 'year', 'storey_mid'])
-
-    # Ensure the order of columns matches the training data
-    input_data = input_data[X_train.columns]
-
-
+                              columns=['town', 'flat_type', 'block', 'street_name', 'floor_area_sqm', 'flat_model', 'lease_commence_date', 'year', 'storey_mid'])
+    
     # Make prediction
     predicted_price = model.predict(input_data)
-
     st.success(f'Predicted Resale Price: ${predicted_price[0]:,.2f}')
