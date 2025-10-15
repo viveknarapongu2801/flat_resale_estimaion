@@ -7,7 +7,7 @@ import gdown
 # -----------------------------
 # Step 1: Download model from Google Drive
 # -----------------------------
-MODEL_URL = "https://drive.google.com/uc?id=1zyyUQ5B4IszL9g260kAySQYVvUvWLMNc"
+MODEL_URL = "https://drive.google.com/file/d/1zyyUQ5B4IszL9g260kAySQYVvUvWLMNc/view?usp=sharing"
 MODEL_PATH = "random_forest_model.pkl"
 
 if not os.path.exists(MODEL_PATH):
